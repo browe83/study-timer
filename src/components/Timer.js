@@ -11,6 +11,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
+import { useState, useEffect } from 'react';
 
 const useStyles = makeStyles({
   container: {
@@ -46,7 +47,36 @@ const useStyles = makeStyles({
 });
 
 export default function Timer() {
+  const [minutes, setMinutes] = useState(25);
+  const [seconds, setSeconds] = useState(0);
+  const [inSession, setSession] = useState(false);
   const classes = useStyles();
+
+  const increment = () => {
+    console.log('increment minutes');
+    setMinutes(minutes + 1);
+  };
+
+  const decrement = () => {
+    console.log('decrement');
+    setMinutes(minutes - 1);
+  };
+
+  const countDown = () => {
+    const currentState = inSession;
+    setSession(!currentState);
+    if (!inSession) {
+      setInterval(() => {
+        setMinutes((m) => m - 1);
+        console.log('minutes:', minutes);
+      }, 1000);
+    } else {
+      console.log('stop session');
+      setMinutes(25);
+    }
+  };
+
+  useEffect(() => {});
 
   return (
     <Container className={classes.container}>
@@ -60,11 +90,11 @@ export default function Timer() {
               Break Length
             </Typography>
             <Box className={classes.arrows}>
-              <IconButton id="break-decrement">
+              <IconButton id="break-decrement" onClick={decrement}>
                 <ArrowDownwardIcon />
               </IconButton>
               <Typography id="break-length">5</Typography>
-              <IconButton id="break-increment">
+              <IconButton id="break-increment" onClick={increment}>
                 <ArrowUpwardIcon />
               </IconButton>
             </Box>
@@ -74,11 +104,11 @@ export default function Timer() {
               Session Length
             </Typography>
             <Box className={classes.arrows}>
-              <IconButton id="session-decrement">
+              <IconButton id="session-decrement" onClick={decrement}>
                 <ArrowDownwardIcon />
               </IconButton>
-              <Typography id="session-length">25</Typography>
-              <IconButton id="session-increment">
+              <Typography id="session-length">{minutes}</Typography>
+              <IconButton id="session-increment" onClick={increment}>
                 <ArrowUpwardIcon />
               </IconButton>
             </Box>
@@ -90,12 +120,12 @@ export default function Timer() {
               Session
             </Typography>
             <Typography id="time-left" align="center" variant="h3">
-              25:00
+              {`${minutes}:0${seconds}`}
             </Typography>
           </Container>
         </Box>
         <Container align="center">
-          <IconButton id="start_stop">
+          <IconButton id="start_stop" onClick={countDown}>
             <PlayCircleOutlineIcon />
             <PauseCircleOutlineIcon />
           </IconButton>
