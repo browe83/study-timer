@@ -51,6 +51,7 @@ export default function Timer() {
   const [seconds, setSeconds] = useState(0);
   const [inSession, setSession] = useState(false);
   const classes = useStyles();
+  // preping new pull request
 
   const increment = () => {
     console.log('increment minutes');
