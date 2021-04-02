@@ -123,7 +123,9 @@ export default function Timer() {
             <Typography id="timer-label" align="center" variant="h5">
               Session
             </Typography>
-            <Typography id="time-left" align="center" variant="h3" />
+            <Typography id="time-left" align="center" variant="h3">
+              Setting Up PR for Staic Count Down
+            </Typography>
           </Container>
         </Box>
         <Container align="center">
