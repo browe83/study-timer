@@ -47,37 +47,40 @@ const useStyles = makeStyles({
 });
 
 export default function Timer() {
+  const [sessionLength, setSessionLength] = useState(25);
+  const [breakLength, setBreakLength] = useState(5);
   const [minutes, setMinutes] = useState(25);
-  const [seconds, setSeconds] = useState(0);
-  const [inSession, setSession] = useState(false);
+  // const [seconds, setSeconds] = useState(0);
+  // const [timer, setTimer] = useState(`25:00`);
   const classes = useStyles();
-  // preping new pull request
 
-  const increment = () => {
-    console.log('increment minutes');
-    setMinutes(minutes + 1);
+  const incrementSession = (e) => {
+    console.log('increment session Length:', e);
+    // eslint-disable-next-line no-unused-expressions
+    sessionLength >= 59
+      ? setSessionLength(60)
+      : setSessionLength((prev) => prev + 1);
   };
 
-  const decrement = () => {
+  const decrementSession = () => {
     console.log('decrement');
-    setMinutes(minutes - 1);
+    // eslint-disable-next-line no-unused-expressions
+    sessionLength === 1
+      ? setSessionLength(1)
+      : setSessionLength((prev) => prev - 1);
   };
 
-  const countDown = () => {
-    const currentState = inSession;
-    setSession(!currentState);
-    if (!inSession) {
-      setInterval(() => {
-        setMinutes((m) => m - 1);
-        console.log('minutes:', minutes);
-      }, 1000);
-    } else {
-      console.log('stop session');
-      setMinutes(25);
-    }
+  const decrementBreak = () => {
+    console.log('decrement');
+    // eslint-disable-next-line no-unused-expressions
+    breakLength === 1 ? setBreakLength(1) : setBreakLength((prev) => prev - 1);
   };
 
-  useEffect(() => {});
+  const incrementBreak = (e) => {
+    console.log('increment break Length:', e);
+    // eslint-disable-next-line no-unused-expressions
+    breakLength >= 59 ? setBreakLength(60) : setBreakLength((prev) => prev + 1);
+  };
 
   return (
     <Container className={classes.container}>
@@ -91,11 +94,11 @@ export default function Timer() {
               Break Length
             </Typography>
             <Box className={classes.arrows}>
-              <IconButton id="break-decrement" onClick={decrement}>
+              <IconButton id="break-decrement" onClick={decrementBreak}>
                 <ArrowDownwardIcon />
               </IconButton>
-              <Typography id="break-length">5</Typography>
-              <IconButton id="break-increment" onClick={increment}>
+              <Typography id="break-length">{breakLength}</Typography>
+              <IconButton id="break-increment" onClick={incrementBreak}>
                 <ArrowUpwardIcon />
               </IconButton>
             </Box>
@@ -105,11 +108,11 @@ export default function Timer() {
               Session Length
             </Typography>
             <Box className={classes.arrows}>
-              <IconButton id="session-decrement" onClick={decrement}>
+              <IconButton id="session-decrement" onClick={decrementSession}>
                 <ArrowDownwardIcon />
               </IconButton>
-              <Typography id="session-length">{minutes}</Typography>
-              <IconButton id="session-increment" onClick={increment}>
+              <Typography id="session-length">{sessionLength}</Typography>
+              <IconButton id="session-increment" onClick={incrementSession}>
                 <ArrowUpwardIcon />
               </IconButton>
             </Box>
@@ -120,13 +123,11 @@ export default function Timer() {
             <Typography id="timer-label" align="center" variant="h5">
               Session
             </Typography>
-            <Typography id="time-left" align="center" variant="h3">
-              {`${minutes}:0${seconds}`}
-            </Typography>
+            <Typography id="time-left" align="center" variant="h3" />
           </Container>
         </Box>
         <Container align="center">
-          <IconButton id="start_stop" onClick={countDown}>
+          <IconButton id="start_stop">
             <PlayCircleOutlineIcon />
             <PauseCircleOutlineIcon />
           </IconButton>
