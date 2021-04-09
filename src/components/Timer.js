@@ -11,9 +11,12 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Duration } from 'luxon';
+import useInterval from '../hooks/useInterval';
+import sound from '../mixkit-alarm-digital-clock-beep-989.wav';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -29,11 +32,17 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     width: '60%',
     paddingTop: '10px',
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+    },
   },
   length: {
     display: 'flex',
     justifyContent: 'space-around',
     width: '400px',
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: 'column',
+    },
   },
   subLength: {
     display: 'flex',
@@ -44,42 +53,71 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
   },
-});
+}));
 
 export default function Timer() {
   const [sessionLength, setSessionLength] = useState(25);
   const [breakLength, setBreakLength] = useState(5);
-  const [minutes, setMinutes] = useState(25);
-  // const [seconds, setSeconds] = useState(0);
-  // const [timer, setTimer] = useState(`25:00`);
-  const classes = useStyles();
+  const [inSession, setInSession] = useState(false);
+  const [mode, setMode] = useState('session');
+  const [time, setTime] = useState(sessionLength * 60 * 1000);
 
-  const incrementSession = (e) => {
-    console.log('increment session Length:', e);
+  const classes = useStyles();
+  const beep = useRef();
+
+  useInterval(() => setTime(time - 1000), inSession ? 1000 : null);
+
+  const timeLeft = (duration) =>
+    Duration.fromMillis(duration).toFormat('mm:ss');
+  // Lines 63 through 83 are not mine.
+  useEffect(() => {
+    if (time === 0 && mode === 'session') {
+      beep.current.play();
+      setMode('break');
+      setTime(breakLength * 60 * 1000);
+    } else if (time === 0 && mode === 'break') {
+      beep.current.play();
+      setMode('session');
+      setTime(sessionLength * 60 * 1000);
+    }
+  }, [time, breakLength, sessionLength, mode]);
+
+  const handleReset = () => {
+    beep.current.pause();
+    beep.current.currentTime = 0;
+    setInSession(false);
+    setMode('session');
+    setBreakLength(5);
+    setSessionLength(25);
+    setTime(25 * 60 * 1000);
+  };
+
+  const incrementSession = () => {
     // eslint-disable-next-line no-unused-expressions
-    sessionLength >= 59
+    sessionLength > 58
       ? setSessionLength(60)
-      : setSessionLength((prev) => prev + 1);
+      : setSessionLength(sessionLength + 1);
   };
 
   const decrementSession = () => {
-    console.log('decrement');
     // eslint-disable-next-line no-unused-expressions
     sessionLength === 1
       ? setSessionLength(1)
-      : setSessionLength((prev) => prev - 1);
+      : setSessionLength(sessionLength - 1);
   };
+
+  useEffect(() => {
+    setTime(sessionLength * 60 * 1000);
+  }, [sessionLength]);
 
   const decrementBreak = () => {
-    console.log('decrement');
     // eslint-disable-next-line no-unused-expressions
-    breakLength === 1 ? setBreakLength(1) : setBreakLength((prev) => prev - 1);
+    breakLength === 1 ? setBreakLength(1) : setBreakLength(breakLength - 1);
   };
 
-  const incrementBreak = (e) => {
-    console.log('increment break Length:', e);
+  const incrementBreak = () => {
     // eslint-disable-next-line no-unused-expressions
-    breakLength >= 59 ? setBreakLength(60) : setBreakLength((prev) => prev + 1);
+    breakLength > 58 ? setBreakLength(60) : setBreakLength(breakLength + 1);
   };
 
   return (
@@ -121,23 +159,26 @@ export default function Timer() {
         <Box>
           <Container>
             <Typography id="timer-label" align="center" variant="h5">
-              Session
+              {mode === 'session' ? 'Session' : 'Break'}
             </Typography>
             <Typography id="time-left" align="center" variant="h3">
-              Setting Up PR for Staic Count Down
+              {timeLeft(time)}
             </Typography>
           </Container>
         </Box>
         <Container align="center">
-          <IconButton id="start_stop">
+          <IconButton id="start_stop" onClick={() => setInSession(!inSession)}>
             <PlayCircleOutlineIcon />
             <PauseCircleOutlineIcon />
           </IconButton>
-          <IconButton id="reset">
+          <IconButton id="reset" onClick={handleReset}>
             <AutorenewIcon />
           </IconButton>
         </Container>
       </Paper>
+      <audio id="beep" src={sound} ref={beep}>
+        <track default kind="captions" />
+      </audio>
     </Container>
   );
 }
