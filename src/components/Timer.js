@@ -69,7 +69,7 @@ export default function Timer() {
 
   const timeLeft = (duration) =>
     Duration.fromMillis(duration).toFormat('mm:ss');
-  // Lines 63 through 83 are not mine.
+
   useEffect(() => {
     if (time === 0 && mode === 'session') {
       beep.current.play();
